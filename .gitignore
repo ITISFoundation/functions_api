@@ -1,0 +1,5 @@
+functions_store.db
+*.old
+/functions-api-client/
+__pycache__/
+openapitools.json
