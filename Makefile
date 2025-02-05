@@ -15,3 +15,5 @@ client: openapi.json
 		pip install -e .
 server:
 	 uvicorn functions_store.main:app --reload
+test:
+	cd examples && python test.py
