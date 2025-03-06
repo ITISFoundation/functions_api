@@ -6,7 +6,7 @@ import openapi_client.api.function_api
 import openapi_client.api.function_job_api
 
 configuration = openapi_client.Configuration()
-configuration.host = "http://127.0.0.1:7000"
+configuration.host = "http://localhost:8000"
 
 api_client = openapi_client.ApiClient(configuration=configuration)
 

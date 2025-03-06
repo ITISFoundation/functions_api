@@ -42,9 +42,7 @@ def register_function_executor(type_name: str, executor: Callable):
 def execute_local_python(url: str, inputs: Dict[str, Any]) -> Any:
     """Execute a local Python function"""
     if ":" not in url:
-        raise ValueError(
-            "URL must be in format /path/to/file.py:function_name"
-        )
+        raise ValueError("URL must be in format /path/to/file.py:function_name")
 
     file_path, function_name = url.rsplit(":", 1)
 
@@ -53,9 +51,7 @@ def execute_local_python(url: str, inputs: Dict[str, Any]) -> Any:
         abs_path = os.path.abspath(file_path)
 
         # Load module spec
-        spec = importlib.util.spec_from_file_location(
-            "dynamic_module", abs_path
-        )
+        spec = importlib.util.spec_from_file_location("dynamic_module", abs_path)
         if spec is None:
             raise ImportError(f"Could not load spec for {abs_path}")
 
@@ -68,9 +64,7 @@ def execute_local_python(url: str, inputs: Dict[str, Any]) -> Any:
 
         # Get function
         if not hasattr(module, function_name):
-            raise AttributeError(
-                f"Function {function_name} not found in {abs_path}"
-            )
+            raise AttributeError(f"Function {function_name} not found in {abs_path}")
 
         func = getattr(module, function_name)
         return func(**inputs)
@@ -93,9 +87,7 @@ register_function_executor("local.python", execute_local_python)
 register_function_executor("remote.http", execute_remote_http)
 
 
-def execute_function(
-    function_type: str, url: str, inputs: Dict[str, Any]
-) -> Any:
+def execute_function(function_type: str, url: str, inputs: Dict[str, Any]) -> Any:
     """Execute a function based on its type"""
     executor = function_executors.get(function_type)
     if not executor:
@@ -121,9 +113,7 @@ def load_function_from_path(file_path: str, function_name: str):
         abs_path = os.path.abspath(file_path)
 
         # Load module spec
-        spec = importlib.util.spec_from_file_location(
-            "dynamic_module", abs_path
-        )
+        spec = importlib.util.spec_from_file_location("dynamic_module", abs_path)
         if spec is None:
             raise ImportError(f"Could not load spec for {abs_path}")
 
@@ -136,9 +126,7 @@ def load_function_from_path(file_path: str, function_name: str):
 
         # Get function
         if not hasattr(module, function_name):
-            raise AttributeError(
-                f"Function {function_name} not found in {abs_path}"
-            )
+            raise AttributeError(f"Function {function_name} not found in {abs_path}")
 
         return getattr(module, function_name)
     except Exception as e:
@@ -169,9 +157,7 @@ def list_functions(db: Session = Depends(get_db)):
     return db.query(database.FunctionDB).all()
 
 
-@app.delete(
-    "/function/all", operation_id="delete_all_functions", tags=["function"]
-)
+@app.delete("/function/all", operation_id="delete_all_functions", tags=["function"])
 def delete_all_functions(db: Session = Depends(get_db)):
     """
     Delete all functions from the store.
@@ -247,9 +233,7 @@ def process_single_input(
     try:
         inputs_dict = json.loads(inputs)
     except json.JSONDecodeError:
-        raise HTTPException(
-            status_code=400, detail=f"Invalid JSON in inputs: {inputs}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid JSON in inputs: {inputs}")
 
     # Create a new database session for this thread
     thread_db = database.SessionLocal()
@@ -372,9 +356,7 @@ async def process_single_job(
         logger.info(f"Job {job_id} execution completed with result: {result}")
 
         # Update job status to COMPLETED
-        job = task_db.query(database.FunctionJobDB).get(
-            job_id
-        )  # Refresh job from DB
+        job = task_db.query(database.FunctionJobDB).get(job_id)  # Refresh job from DB
         job.outputs = {"result": result}
         job.status = models.JobStatus.COMPLETED
         task_db.commit()
@@ -383,9 +365,7 @@ async def process_single_job(
     except Exception as e:
         logger.error(f"Error processing job {job_id}: {str(e)}", exc_info=True)
         # Update job with error
-        job = task_db.query(database.FunctionJobDB).get(
-            job_id
-        )  # Refresh job from DB
+        job = task_db.query(database.FunctionJobDB).get(job_id)  # Refresh job from DB
         job.status = models.JobStatus.FAILED
         job.job_info = {"error": str(e)}
         task_db.commit()
@@ -437,9 +417,7 @@ async def process_inputs_async(
             logger.info(f"All tasks completed. Job IDs: {completed_job_ids}")
 
     except Exception as e:
-        logger.error(
-            f"Error in background processing: {str(e)}", exc_info=True
-        )
+        logger.error(f"Error in background processing: {str(e)}", exc_info=True)
         # Update all remaining jobs as failed
         for job in jobs:
             if job.status in [
@@ -553,9 +531,7 @@ async def batch_run_function(
     operation_id="get_collection_status",
     tags=["function_job_collection"],
 )
-async def get_collection_status(
-    collection_id: int, db: Session = Depends(get_db)
-):
+async def get_collection_status(collection_id: int, db: Session = Depends(get_db)):
     """
     Get status of a function job collection.
 
@@ -572,9 +548,7 @@ async def get_collection_status(
         .first()
     )
     if not collection:
-        raise HTTPException(
-            status_code=404, detail="Function job collection not found"
-        )
+        raise HTTPException(status_code=404, detail="Function job collection not found")
 
     # Get status of all jobs in collection
     jobs = (
@@ -689,9 +663,7 @@ def run_function(function_id: int, inputs: str, db: Session = Depends(get_db)):
     # Validate inputs against schema if defined
     if function.input_schema:
         try:
-            validate_against_json_schema(
-                inputs_dict, function.input_schema, "Input"
-            )
+            validate_against_json_schema(inputs_dict, function.input_schema, "Input")
         except HTTPException as e:
             # Create failed job with validation error
             job = database.FunctionJobDB(
@@ -812,16 +784,12 @@ async def map_function(
         db.refresh(job)
 
     # Start background processing only for jobs that passed validation
-    pending_jobs = [
-        job for job in jobs if job.status == models.JobStatus.PENDING
-    ]
+    pending_jobs = [job for job in jobs if job.status == models.JobStatus.PENDING]
     if pending_jobs:
         background_task = asyncio.create_task(
             process_inputs_async(function, pending_jobs, db, max_workers)
         )
-        app.state.background_tasks = getattr(
-            app.state, "background_tasks", set()
-        )
+        app.state.background_tasks = getattr(app.state, "background_tasks", set())
         app.state.background_tasks.add(background_task)
         background_task.add_done_callback(
             lambda t: app.state.background_tasks.remove(t)
@@ -841,15 +809,11 @@ def list_function_jobs(
     limit: Optional[int] = Query(
         None, ge=1, le=1000, description="Maximum number of jobs to return"
     ),
-    offset: Optional[int] = Query(
-        None, ge=0, description="Number of jobs to skip"
-    ),
+    offset: Optional[int] = Query(None, ge=0, description="Number of jobs to skip"),
     status: Optional[models.JobStatus] = Query(
         None, description="Filter by job status"
     ),
-    function_id: Optional[int] = Query(
-        None, description="Filter by function ID"
-    ),
+    function_id: Optional[int] = Query(None, description="Filter by function ID"),
     start_date: Optional[datetime] = Query(
         None, description="Filter jobs after this date"
     ),
@@ -906,15 +870,11 @@ def list_function_jobs(
     tags=["function_job"],
 )
 async def get_function_jobs(
-    function_id: int = Path(
-        ..., description="ID of the function to get jobs for"
-    ),
+    function_id: int = Path(..., description="ID of the function to get jobs for"),
     limit: Optional[int] = Query(
         100, ge=1, le=1000, description="Maximum number of jobs to return"
     ),
-    offset: Optional[int] = Query(
-        0, ge=0, description="Number of jobs to skip"
-    ),
+    offset: Optional[int] = Query(0, ge=0, description="Number of jobs to skip"),
     status: Optional[models.JobStatus] = Query(
         None, description="Filter by job status"
     ),
