@@ -6,16 +6,14 @@ import openapi_client.api.function_api
 import openapi_client.api.function_job_api
 
 configuration = openapi_client.Configuration()
-configuration.host = "http://127.0.0.1:8000"
+configuration.host = "http://127.0.0.1:7000"
 
 api_client = openapi_client.ApiClient(configuration=configuration)
 
 funcapi = openapi_client.api.function_api.FunctionApi(api_client)
 funcjobapi = openapi_client.api.function_job_api.FunctionJobApi(api_client)
-funcjobcolapi = (
-    openapi_client.api.function_job_collection_api.FunctionJobCollectionApi(
-        api_client
-    )
+funcjobcolapi = openapi_client.api.function_job_collection_api.FunctionJobCollectionApi(
+    api_client
 )
 
 funcapi.delete_all_functions()
@@ -27,7 +25,7 @@ functions["test_function1"] = openapi_client.models.Function(
     name="test_function1",
     type="local.python",
     description="Test function 1",
-    url="/home/vangeit/src/functions_api/examples/test_script/test_function1.py:test_function1",
+    url="./examples/test_script/test_function1.py:test_function1",
 )
 functions["test_function1_slow"] = openapi_client.models.Function(
     name="test_function1_slow",
@@ -44,7 +42,7 @@ functions["test_function1_slow"] = openapi_client.models.Function(
         "required": ["result"],
     },
     tags=["cacheable"],
-    url="/home/vangeit/src/functions_api/examples/test_script/test_function1_slow.py:test_function1",
+    url="./examples/test_script/test_function1_slow.py:test_function1",
 )
 functions["test_study1"] = openapi_client.models.Function(
     name="test_study1",
@@ -82,9 +80,7 @@ response = funcapi.batch_run_function(
     max_workers=2,
 )
 
-while (
-    "COMPLETED" not in funcjobcolapi.get_collection_status(response.id).status
-):
+while "COMPLETED" not in funcjobcolapi.get_collection_status(response.id).status:
     time.sleep(1)
     response = funcjobcolapi.get_collection_status(response.id)
     print(response)

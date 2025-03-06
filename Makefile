@@ -1,19 +1,26 @@
+SHELL := /bin/bash
+
+# Directory for virtual environment
+VENV_DIR := ".pyenv"
+
 clean:
 	rm -f openapi.json
 	rm -rf functions-api-client
+pyenv: clean
+	@python -m venv $(VENV_DIR)
+	@. ./$(VENV_DIR)/bin/activate && pip install -r requirements.txt
+server:
+	@. ./$(VENV_DIR)/bin/activate && python -m uvicorn functions_store.main:app --reload
 openapi.json: clean
 	curl http://localhost:8000/generate-openapi
 client: openapi.json
-	sudo npm install @openapitools/openapi-generator-cli -g
-	sudo openapi-generator-cli generate \
+	npm install @openapitools/openapi-generator-cli -g
+	openapi-generator-cli generate \
 		-i openapi.json \
 		-g python \
 		-o ./functions-api-client \
 	    --additional-properties=packageName=openapi_client
-	sudo chown -R vangeit:vangeit functions-api-client
-	cd functions-api-client \
-		pip install -e .
-server:
-	 uvicorn functions_store.main:app --reload
+	sudo chown -R ordonez:ordonez functions-api-client
+	./$(VENV_DIR)/bin/python -m pip install -e functions-api-client
 test:
-	cd examples && python test.py
+	@. ./$(VENV_DIR)/bin/activate && cd examples && python test.py

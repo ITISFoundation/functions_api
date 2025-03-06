@@ -1,0 +1,6 @@
+jsonschema
+uvicorn
+requests
+fastapi
+sqlalchemy
+pydantic

@@ -3,3 +3,7 @@ functions_store.db
 /functions-api-client/
 __pycache__/
 openapitools.json
+node_modules
+package.json
+package-lock.json
+/.pyenv
