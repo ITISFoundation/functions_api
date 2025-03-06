@@ -46,27 +46,9 @@ def execute_local_python(url: str, inputs: Dict[str, Any]) -> Any:
 
     file_path, function_name = url.rsplit(":", 1)
 
+    func = load_function_from_path(file_path, function_name)
+
     try:
-        # Get absolute path
-        abs_path = os.path.abspath(file_path)
-
-        # Load module spec
-        spec = importlib.util.spec_from_file_location("dynamic_module", abs_path)
-        if spec is None:
-            raise ImportError(f"Could not load spec for {abs_path}")
-
-        # Create module
-        module = importlib.util.module_from_spec(spec)
-        sys.modules["dynamic_module"] = module
-
-        # Execute module
-        spec.loader.exec_module(module)
-
-        # Get function
-        if not hasattr(module, function_name):
-            raise AttributeError(f"Function {function_name} not found in {abs_path}")
-
-        func = getattr(module, function_name)
         return func(**inputs)
     except Exception as e:
         raise Exception(f"Error executing local Python function: {str(e)}")
