@@ -14,6 +14,11 @@ from typing import Dict, List, Any
 import pandas as pd
 import numpy as np
 
+## TODO could include label converter here (as part of the function)
+## maybe even give option to user to do so in the GUI
+# (e.g. user can provide "display" label for variable, which is optional)
+# save (& load) all of those in a JSON file, which stays with the app
+
 
 def retrieve_csv_result(
     csv_file_path: str, inputs: Dict[str, Any], outputs: List[str]
@@ -41,6 +46,28 @@ def retrieve_csv_result(
     result = result.iloc[0]
 
     return result.to_dict()
+
+
+# class FunctionReturn(TypedDict):
+#     # "EM_Shunting_Total_Current",
+#     # "EM_Shunting_Current_Nerve",
+#     # "EM_Shunting_Current_Outside",
+#     # "EM_Shunting_Shunted_Current",
+#     # "Dosimetry_Saline_PeakE",
+#     # "Dosimetry_Saline_Iso99E",
+#     # "Dosimetry_Saline_Iso98E",
+#     # "Dosimetry_Saline_icnirp_peaks",
+#     # "Dosimetry_Nerve_PeakE",
+#     # "Dosimetry_Nerve_Iso99E",
+#     # "Dosimetry_Nerve_Iso98E",
+#     # "Dosimetry_Nerve_icnirp_peaks",
+#     # "Dosimetry_Fascicles_PeakE",
+#     # "Dosimetry_Fascicles_Iso99E",
+#     # "Dosimetry_Fascicles_Iso98E",
+#     # "Dosimetry_Fascicles_icnirp_peaks",
+#     Thermal_Peak_Overall: float
+#     Thermal_Peak_Nerve: float
+#     Thermal_Peak_Saline: float
 
 
 def nih_in_silico(
@@ -103,7 +130,7 @@ def nih_in_silico(
 
     return retrieve_csv_result(
         csv_file_path=csv_file_path, inputs=inputs, outputs=outputs
-    )["Thermal_Peak_Overall"]
+    )
 
 
 if __name__ == "__main__":
@@ -121,23 +148,10 @@ if __name__ == "__main__":
         "ThermalConductivity_Connective_Tissue": 0.1457043777250806,
         "HeatTransferRate_Connective_Tissue": 1683.5556671060272,
     }
-    example_outputs = [
-        "Thermal_Peak_Overall",
-        "Thermal_Peak_Nerve",
-        "Thermal_Peak_Saline",
-    ]
 
-    print(
-        # retrieve_csv_result(
-        #     csv_file_path=example_csv_file_path,
-        #     inputs=example_inputs,
-        #     outputs=example_outputs,
-        # )
-        nih_in_silico(**example_inputs)
-    )
+    print(nih_in_silico(**example_inputs))
     print("Done!")
 
-    import openapi_client
     from openapi_client import Configuration, ApiClient
     from openapi_client.api.function_api import FunctionApi
 
@@ -180,34 +194,6 @@ if __name__ == "__main__":
                 "ThermalConductivity_Connective_Tissue": {"type": "number"},
                 "HeatTransferRate_Connective_Tissue": {"type": "number"},
             },
-            "required": [
-                "SigmaMuscle",
-                "SigmaEpineurium",
-                "SigmaPerineurium",
-                "SigmaAlongFascicles",
-                "SigmaTransverseFascicles",
-                "ThermalConductivity_Fascicles",
-                "HeatTransferRate_Fascicles",
-                "ThermalConductivity_Saline",
-                "HeatTransferRate_Saline",
-                "ThermalConductivity_Connective_Tissue",
-                "HeatTransferRate_Connective_Tissue",
-            ],
-        },
-        output_schema={
-            "type": "object",
-            "properties": {"result": {"type": "number"}},
-            "required": ["result"],
-            # "properties": {
-            #     "Thermal_Peak_Overall": {"type": "number"},
-            #     "Thermal_Peak_Nerve": {"type": "number"},
-            #     "Thermal_Peak_Saline": {"type": "number"},
-            # },
-            # "required": [
-            #     "Thermal_Peak_Overall",
-            #     "Thermal_Peak_Nerve",
-            #     "Thermal_Peak_Saline",
-            # ],
         },
         tags=["cacheable"],
         url="./examples/csv_retrieval_functions.py:nih_in_silico",
@@ -225,9 +211,6 @@ if __name__ == "__main__":
     import pprint
 
     print(f"\nList of functions:\n {pprint.pformat(funcapi.list_functions())}\n")
-    print(
-        f"\nCacheable functions:\n {pprint.pformat(funcapi.search_functions_by_tags(tags=['cacheable']))}\n"
-    )
 
     function_job = funcapi.run_function(
         function_id=created_functions["nih_in_silico"].id,
