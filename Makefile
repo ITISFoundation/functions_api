@@ -13,7 +13,7 @@ server:
 	@. ./$(VENV_DIR)/bin/activate && python -m uvicorn functions_store.main:app --reload
 openapi.json: clean
 	curl http://localhost:8000/generate-openapi
-client: openapi.json
+client: openapi.json # python client - for testing. In practice, run in the target (client) side
 	npm install @openapitools/openapi-generator-cli -g
 	openapi-generator-cli generate \
 		-i openapi.json \
@@ -22,5 +22,5 @@ client: openapi.json
 	    --additional-properties=packageName=openapi_client
 	sudo chown -R ordonez:ordonez functions-api-client
 	@. ./$(VENV_DIR)/bin/activate && pip install ./functions-api-client
-test:
+test: client
 	@. ./$(VENV_DIR)/bin/activate && cd examples && python test.py
