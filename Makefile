@@ -12,7 +12,7 @@ pyenv: clean
 server:
 	@. ./$(VENV_DIR)/bin/activate && python -m uvicorn functions_store.main:app --reload
 openapi.json: clean
-	curl http://localhost:8000/generate-openapi
+	curl http://localhost:8000/generate-openapi -o openapi.json
 client: openapi.json
 	npm install @openapitools/openapi-generator-cli -g
 	openapi-generator-cli generate \

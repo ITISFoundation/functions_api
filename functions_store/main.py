@@ -82,10 +82,8 @@ def execute_function(function_type: str, url: str, inputs: Dict[str, Any]) -> An
 async def generate_openapi():
     """Generate OpenAPI spec and save to file"""
     openapi_schema = app.openapi()
-
-    with open("openapi.json", "w") as f:
-        json.dump(openapi_schema, f, indent=2)
-    return {"message": "OpenAPI spec generated"}
+    print("OpenAPI spec generated")
+    return openapi_schema
 
 
 def load_function_from_path(file_path: str, function_name: str):
