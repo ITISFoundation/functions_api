@@ -13,14 +13,21 @@ server:
 	@. ./$(VENV_DIR)/bin/activate && python -m uvicorn functions_store.main:app --reload
 openapi.json: clean
 	curl http://localhost:8000/generate-openapi -o openapi.json
-client: openapi.json
+python-client: openapi.json
 	npm install @openapitools/openapi-generator-cli -g
 	openapi-generator-cli generate \
 		-i openapi.json \
 		-g python \
-		-o ./functions-api-client \
+		-o ./functions-api-python-client \
 	    --additional-properties=packageName=openapi_client
-	sudo chown -R ordonez:ordonez functions-api-client
-	@. ./$(VENV_DIR)/bin/activate && pip install ./functions-api-client
-test:
-	@. ./$(VENV_DIR)/bin/activate && cd examples && python test.py
+	sudo chown -R ordonez:ordonez functions-api-python-client
+	@. ./$(VENV_DIR)/bin/activate && pip install ./functions-api-python-client
+js-client: openapi.json
+	curl http://localhost:8000/generate-openapi -o openapi.json
+	npm install @openapitools/openapi-generator-cli -g
+	openapi-generator-cli generate \
+		-i openapi.json \
+		-g javascript \
+		-o ./functions-api-js-client
+python-client-test:
+	@. ./$(VENV_DIR)/bin/activate && cd examples && python python_client_test.py
