@@ -11,6 +11,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import requests
 from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query
+from fastapi.middleware.cors import CORSMiddleware
 from jsonschema import ValidationError as JSONSchemaValidationError
 from jsonschema import validate
 from jsonschema.validators import validator_for
@@ -29,6 +30,12 @@ app = FastAPI(
         {"name": "function", "description": "Function operations"},
         {"name": "function_job", "description": "Function job operations"},
     ],
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 function_executors: Dict[str, Callable] = {}
