@@ -3,7 +3,7 @@ if __name__ == "__main__":
     from openapi_client.api.function_api import FunctionApi
 
     configuration = Configuration()
-    configuration.host = "http://localhost:8000"
+    configuration.host = "http://localhost:8087"
 
     api_client = ApiClient(configuration=configuration)
     funcapi = FunctionApi(api_client)

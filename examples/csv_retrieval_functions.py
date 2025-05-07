@@ -10,7 +10,7 @@ Steps to be implemented are:
                     (or ITIS-Dakota backend, if generating an LHS).
 """
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 import pandas as pd
 import numpy as np
 
@@ -19,10 +19,9 @@ import numpy as np
 # (e.g. user can provide "display" label for variable, which is optional)
 # save (& load) all of those in a JSON file, which stays with the app
 
-
 def retrieve_csv_result(
-    csv_file_path: str, inputs: Dict[str, Any], outputs: List[str]
-) -> Dict[str, Any]:
+    csv_file_path: str, **inputs: Dict[str, float]
+) -> Dict[str, float]:
     """
     Retrieve the result from a csv file.
     """
@@ -34,19 +33,15 @@ def retrieve_csv_result(
             raise ValueError(
                 f"Input {col} not in the csv file. Columns are: {df.columns.values}"
             )
-    for col in outputs:
-        if col not in df.columns:
-            raise ValueError(
-                f"Output {col} not in the csv file. Columns are: {df.columns.values}"
-            )
-
-    result = df.loc[np.all(df[inputs.keys()] == inputs.values(), axis=1), outputs]
+    result = df.loc[np.all(df[inputs.keys()] == inputs.values(), axis=1)]  #type: ignore
+    # Check if the result is empty or has multiple rows
     assert len(result) != 0, f"No result found for inputs {inputs}."
     assert len(result) == 1, f"Multiple results found for inputs {inputs}."
-    result = result.iloc[0]
 
-    return result.to_dict()
-
+    result = result.drop(columns=inputs.keys())
+    result = result.iloc[0].to_dict()
+    print(f"Result found for inputs {inputs}: \n\n {result}")
+    return result
 
 # class FunctionReturn(TypedDict):
 #     # "EM_Shunting_Total_Current",
@@ -160,7 +155,7 @@ if __name__ == "__main__":
     from openapi_client.models.function import Function
 
     configuration = Configuration()
-    configuration.host = "http://localhost:8000"
+    configuration.host = "http://localhost:8087"
 
     api_client = ApiClient(configuration=configuration)
     funcapi = FunctionApi(api_client)

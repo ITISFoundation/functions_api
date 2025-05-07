@@ -11,7 +11,7 @@ class Function(BaseModel):
     type: str
     url: str
     description: str
-    input_schema: Optional[Dict[str, Any]] = None  # JSON Schema
+    input_schema: Optional[Dict[str, Any]] = None  # JSON Schema ## TODO improve typing
     output_schema: Optional[Dict[str, Any]] = None  # JSON Schema
     tags: Optional[List[str]] = None  # Added tags field
 

@@ -680,7 +680,10 @@ def run_function(function_id: int, inputs: str, db: Session = Depends(get_db)):
         # Validate output against schema if defined
         if function.output_schema:
             try:
-                output_dict = {"result": result}
+                if isinstance(result, dict):
+                    output_dict = result
+                else:
+                    output_dict = {"result": result}
                 validate_against_json_schema(
                     output_dict, function.output_schema, "Output"
                 )
@@ -690,7 +693,10 @@ def run_function(function_id: int, inputs: str, db: Session = Depends(get_db)):
                 db.commit()
                 return job
 
-        job.outputs = {"result": result}
+        if isinstance(result, dict):
+            job.outputs = result
+        else:
+            job.outputs = {"result": result}
         job.status = models.JobStatus.COMPLETED
         db.commit()
 

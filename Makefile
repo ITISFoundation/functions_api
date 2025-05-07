@@ -10,9 +10,9 @@ pyenv: clean
 	@python -m venv $(VENV_DIR)
 	@. ./$(VENV_DIR)/bin/activate && pip install -r functions_store/requirements.txt
 server:
-	@. ./$(VENV_DIR)/bin/activate && python -m uvicorn functions_store.main:app --reload
+	@. ./$(VENV_DIR)/bin/activate && python -m uvicorn functions_store.main:app --reload --port 8087
 openapi.json: clean
-	curl http://localhost:8000/generate-openapi -o openapi.json
+	curl http://localhost:8087/generate-openapi -o openapi.json
 python-client: openapi.json
 	npm install @openapitools/openapi-generator-cli -g
 	openapi-generator-cli generate \
@@ -23,7 +23,7 @@ python-client: openapi.json
 	sudo chown -R ordonez:ordonez functions-api-python-client
 	@. ./$(VENV_DIR)/bin/activate && pip install ./functions-api-python-client
 js-client: openapi.json
-	curl http://localhost:8000/generate-openapi -o openapi.json
+	curl http://localhost:8087/generate-openapi -o openapi.json
 	npm install @openapitools/openapi-generator-cli -g
 	openapi-generator-cli generate \
 		-i openapi.json \
